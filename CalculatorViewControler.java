@@ -4,8 +4,8 @@ package calculator;
  * File Name:       CalculatorViewController.java
  * Author:          Jason Waid, 040912687
  * Course:          CST8221 - JAP, Lab Section: 311
- * Assignment:      1, Part 1
- * Date:            Oct 18th 2019
+ * Assignment:      1, Part 2
+ * Date:            Nov 1st 2019
  * Professor:       Daniel Cormier
  * Purpose:         Builds the class GUI
  * Class list:      CalculatorViewController, Controller
@@ -20,6 +20,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -47,16 +48,17 @@ public class CalculatorViewControler extends JPanel {
 	private JButton dotButton; // the decimal point (dot) button reference
 	private JButton[] hexButtons = new JButton[6]; // reference to container for alphabetical hex buttons
 
-	private static final String[] keys = { "*", "+", "A", "B", "C", "D", "E", "F", "7", "8", "9", "/", "4", "5", "6",
-			"-", "1", "2", "3", ".", "0", "\u00B1" };
+	private static final String[] keys = { "A", "B", "C", "D", "E", "F", "7", "8", "9", "/", "4", "5", "6", "-", "1",
+			"2", "3", ".", "0", "\u00B1", "*", "+" };
 
-	/**
-	 * This default constructor builds all the components of the GUI
-	 */
+	/* This default constructor builds all the components of the GUI */
+
 	public CalculatorViewControler() {
 
-		/* reference to the controler for handling events */
-		Controler controler = new Controler();
+		CalculatorModel model = new CalculatorModel();
+
+		/* reference to the controller for handling events */
+		Controller controler = new Controller(model);
 
 		/* Builds a panel for the error label, text fields, backspace button */
 		JPanel topNorth = new JPanel();
@@ -192,6 +194,8 @@ public class CalculatorViewControler extends JPanel {
 		hundredthRadioButton.setBackground(Color.YELLOW);
 		sciRadioButton.setBackground(Color.YELLOW);
 
+		ButtonGroup group = new ButtonGroup();
+
 		/* sets up action listener for the above buttons */
 		checkBox.addActionListener(controler);
 		tenthRadioButton.addActionListener(controler);
@@ -204,6 +208,11 @@ public class CalculatorViewControler extends JPanel {
 		radioButtons.add(hundredthRadioButton);
 		radioButtons.add(sciRadioButton);
 
+		group.add(checkBox);
+		group.add(sciRadioButton);
+		group.add(tenthRadioButton);
+		group.add(hundredthRadioButton);
+
 		precisionPanel.add(checkBox, BorderLayout.WEST);
 		precisionPanel.add(radioButtons, BorderLayout.EAST);
 
@@ -215,6 +224,7 @@ public class CalculatorViewControler extends JPanel {
 
 		/* numerical Keypad */
 		mainPanel.setLayout(new BorderLayout());
+		mainPanel.setPreferredSize(new Dimension(50, 380));
 
 		/* sets the layout for the keypad buttons */
 		keypad.setLayout(new GridLayout(6, 3, 3, 3));
@@ -249,39 +259,26 @@ public class CalculatorViewControler extends JPanel {
 		/* for loop for displaying buttons */
 		for (int i = 0; i < keys.length; i++) {
 			if (keys[i].equals(".")) {
-				dotButton = createButton(".", ".", Color.BLACK, Color.MAGENTA, new Controler());
+				dotButton = createButton(".", ".", Color.BLACK, Color.MAGENTA, controler);
 				keypad.add(dotButton);
 			} else if (keys[i].equals("\u00B1")) {
-				keypad.add(createButton("\u00B1", "\u00B1", Color.BLACK, Color.MAGENTA, new Controler()));
+				keypad.add(createButton("\u00B1", "\u00B1", Color.BLACK, Color.MAGENTA, controler));
 			} else if (keys[i].equals("+") || keys[i].equals("-")) {
-				rightOperator.add(createButton(keys[i], keys[i], Color.BLACK, Color.CYAN, new Controler()));
+				rightOperator.add(createButton(keys[i], keys[i], Color.BLACK, Color.CYAN, controler));
 			} else if (keys[i].equals("*") || keys[i].equals("/")) {
-				leftOperator.add(createButton(keys[i], keys[i], Color.BLACK, Color.CYAN, new Controler()));
-			} else if (keys[i].equals("A")) {
-				hexButtons[0] = (JButton) keypad
-						.add(createButton(keys[i], keys[i], Color.WHITE, Color.BLUE, new Controler()));
-			} else if (keys[i].equals("B")) {
-				hexButtons[1] = (JButton) keypad
-						.add(createButton(keys[i], keys[i], Color.WHITE, Color.BLUE, new Controler()));
-			} else if (keys[i].equals("C")) {
-				hexButtons[2] = (JButton) keypad
-						.add(createButton(keys[i], keys[i], Color.WHITE, Color.BLUE, new Controler()));
-			} else if (keys[i].equals("D")) {
-				hexButtons[3] = (JButton) keypad
-						.add(createButton(keys[i], keys[i], Color.WHITE, Color.BLUE, new Controler()));
-			} else if (keys[i].equals("E")) {
-				hexButtons[4] = (JButton) keypad
-						.add(createButton(keys[i], keys[i], Color.WHITE, Color.BLUE, new Controler()));
-			} else if (keys[i].equals("F")) {
-				hexButtons[5] = (JButton) keypad
-						.add(createButton(keys[i], keys[i], Color.WHITE, Color.BLUE, new Controler()));
+				leftOperator.add(createButton(keys[i], keys[i], Color.BLACK, Color.CYAN, controler));
+			} else if (keys[i].matches("[A-F]")) {
+				hexButtons[i] = (JButton) keypad
+						.add(createButton(keys[i], keys[i], Color.WHITE, Color.BLUE, controler));
+				hexButtons[i].setEnabled(false);
 			} else {
-				keypad.add(createButton(keys[i], keys[i], Color.BLACK, Color.BLUE, new Controler()));
+				keypad.add(createButton(keys[i], keys[i], Color.BLACK, Color.BLUE, controler));
 			}
-		}
 
-		topOperator.add(createButton("C", "C", Color.BLACK, Color.RED, new Controler()));
-		bottomOperator.add(createButton("=", "=", Color.BLACK, Color.YELLOW, new Controler()));
+		}
+		// changed action cmd to cl since C is for hex
+		topOperator.add(createButton("C", "CL", Color.BLACK, Color.RED, controler));
+		bottomOperator.add(createButton("=", "=", Color.BLACK, Color.YELLOW, controler));
 
 		add(top, BorderLayout.NORTH);
 		add(mainPanel, BorderLayout.SOUTH);
@@ -330,16 +327,452 @@ public class CalculatorViewControler extends JPanel {
 	 * private inner class inside the CalculatorViewController class.
 	 * 
 	 * @author Jason Waid
-	 * @version 1
+	 * @version 2
 	 * @see calculator
 	 * @since 1.8.0
 	 *
 	 */
-	private class Controler implements ActionListener {
+	private class Controller implements ActionListener {
+
+		CalculatorModel model;
+
+		boolean integerFlag = false;
+		boolean backspaceFlag = false;
+		boolean overrideFlag = true;
+
+		public Controller(CalculatorModel model) {
+			this.model = model;
+		}
+
+		/**
+		 * This method is used determine which logic to use following a numpad key press
+		 * 
+		 * @param key
+		 *            - the key being pressed
+		 */
+
+		public void keypadNums(String key) {
+
+			switch (model.getState()) {
+			case CalculatorModel.OPERAND_1:
+				if (overrideFlag == true) {
+					display2.setText(key);
+					overrideFlag = false;
+
+					break;
+				} else {
+					display2.setText(display2.getText().concat(key));
+					break;
+				}
+
+			case CalculatorModel.OPERAND_2:
+				if (overrideFlag == true) {
+					display2.setText(key);
+					overrideFlag = false;
+					break;
+				} else {
+					display2.setText(display2.getText().concat(key));
+					break;
+				}
+
+			case CalculatorModel.RESULT:
+				display1.setText("");
+				display2.setText(key);
+				break;
+
+			default:
+				model.setErrorState(true);
+				break;
+			}
+		}
+
+		/**
+		 * This method is used determine which logic to use following a equal key press
+		 * 
+		 */
+
+		public void keypadEquals() {
+
+			switch (model.getState()) {
+			case CalculatorModel.OPERAND_2:
+				model.setOperand2(display2.getText());
+				String calculation = model.getResult();
+
+				if (calculation != null) {
+					display1.setText("");
+					display2.setText(calculation);
+					break;
+				} else {
+					model.setErrorState(true);
+					break;
+				}
+				// prints result again if we are already at the result stage
+			case CalculatorModel.RESULT:
+				display2.setText(model.getResult());
+				break;
+			}
+		}
+
+		/**
+		 * This method is used determine which logic to use following a operation key
+		 * press
+		 * 
+		 * @param key
+		 *            - the key being pressed
+		 */
+
+		public void keypadOperations(String key) {
+
+			switch (model.getState()) {
+			case CalculatorModel.OPERAND_1:
+				overrideFlag = true;
+
+				model.setOperand1(display2.getText());
+				model.setOperation(key);
+				display1.setText(display2.getText().concat(key));
+				break;
+
+			case CalculatorModel.OPERAND_2:
+				if (overrideFlag == true) {
+					model.setOperation(key);
+					display1.setText(display2.getText().concat(key));
+					break;
+				} else {
+					break;
+				}
+			case CalculatorModel.RESULT:
+				model.setOperation(key);
+				display1.setText(display2.getText().concat(key));
+				display2.getText();
+				overrideFlag = true;
+				break;
+
+			default:
+				model.setErrorState(true);
+				break;
+			}
+
+		}
+
+		/**
+		 * This method controls the look and feel of the calculator
+		 * 
+		 * @param enable
+		 *            - boolean used to control features such and dot button, Hex and
+		 *            float mode
+		 */
+
+		public void display(boolean enable) {
+			if (enable == true) {
+				dotButton.setEnabled(enable);
+				dotButton.setBackground(Color.BLUE);
+				error.setText("F");
+				error.setBackground(Color.YELLOW);
+
+			} else {
+				dotButton.setEnabled(enable);
+				dotButton.setBackground(new Color(178, 156, 250));
+				error.setText("H");
+				error.setBackground(Color.GREEN);
+			}
+		}
+
+		/**
+		 * This method contains the default display for all modes of operation
+		 *
+		 */
+
+		public void defaultDisplays() {
+
+			switch (model.getPrecision()) {
+			case CalculatorModel.PRECISION_0:
+				display1.setText("");
+				display2.setText("0.0");
+				break;
+			case CalculatorModel.PRECISION_00:
+				display1.setText("");
+				display2.setText("0.00");
+				break;
+			default:// everything else shares the same format by default
+				display1.setText("");
+				display2.setText("0");
+				break;
+			}
+		}
+
+		/**
+		 * This method handles all of the key press action events for the calculator
+		 *
+		 * @param event
+		 *            - an action event following a key press
+		 */
 
 		@Override
 		public void actionPerformed(ActionEvent event) {
-			display2.setText(event.getActionCommand());
+
+			boolean keypadError = false;
+
+			/* Cases for handling button events */
+			switch (event.getActionCommand()) {
+			/* These handle numpad button events */
+			case "0":
+			case "1":
+			case "2":
+			case "3":
+			case "4":
+			case "5":
+			case "6":
+			case "7":
+			case "8":
+			case "9":
+			case "A":
+			case "B":
+			case "C":
+			case "D":
+			case "E":
+			case "F":
+
+				if (model.getErrorState() == false) {
+					keypadNums(event.getActionCommand());
+
+					if (model.getErrorState() == true) {
+						keypadError = true;
+					}
+
+				}
+
+				backspaceFlag = true;
+				break;
+			/* These handle operator button events */
+			case "+":
+			case "-":
+			case "/":
+			case "*":
+
+				if (model.getErrorState() == false) {
+					keypadOperations(event.getActionCommand());
+
+					if (model.getErrorState() == true) {
+						keypadError = true;
+					}
+
+				}
+
+				backspaceFlag = true;
+				break;
+
+			/* This handles equals button events */
+			case "=":
+
+				if (model.getErrorState() == false) {
+					keypadEquals();
+
+					if (model.getErrorState() == true) {
+						keypadError = true;
+					}
+
+				}
+
+				backspaceFlag = false;
+				break;
+
+			/* This handles plus minus sign button events */
+			case "\u00B1":
+
+				if (model.getErrorState() == false) {
+
+					if (display2.getText().startsWith("-")) {
+						display2.setText(display2.getText().replace("-", ""));
+					} else if (display2.getText().startsWith("+")) {
+						display2.setText(display2.getText().replace("", "-"));
+					} else {
+						display2.setText("-".concat(display2.getText()));
+					}
+
+					if (model.getErrorState() == true) {
+						keypadError = true;
+					}
+				}
+				backspaceFlag = true;
+				break;
+
+			/* This handles backspace button events */
+			case "\u21DA":
+
+				/* stops backspace from being used when it shouldn't be */
+				if (backspaceFlag == false) {
+					break;
+				}
+
+				if (model.getErrorState() == false) {
+
+					if (overrideFlag == false) {
+
+						if (display2.getText().length() > 1) {
+
+							display2.setText(display2.getText().substring(0, display2.getText().length() - 1));
+
+							if (display2.getText().length() == 1 && display2.getText().contains("-")) {
+								defaultDisplays();
+								model.clear();
+
+								overrideFlag = true;
+
+							}
+
+						} else {
+
+							defaultDisplays();
+							model.clear();
+
+							overrideFlag = true;
+
+						}
+
+					}
+
+				}
+				break;
+
+			/* This handles clear button events */
+			case "CL":
+
+				if (model.getErrorState() == true) {
+					display(!model.integerMode());
+				}
+
+				defaultDisplays();
+				model.clear();
+
+				overrideFlag = true;
+
+				break;
+			/* This handles dot button events */
+			case ".":
+
+				if (model.getErrorState() == false) {
+
+					if (integerFlag == false) {
+
+						if (overrideFlag == true) {
+
+							display2.setText(".");
+							overrideFlag = false;
+
+						} else {
+							/* if dot is already present, move it to new location */
+							if (display2.getText().contains(".")) {
+								display2.setText(display2.getText().replace(".", ""));
+							}
+							/* adds dot to the end of display2 string */
+							display2.setText(display2.getText().concat("."));
+						}
+
+					}
+				}
+				break;
+			/* This handles .0 precision button events */
+			case ".0":
+
+				integerFlag = false;
+				model.setFloatingPointPrecision(CalculatorModel.PRECISION_0);
+				model.setOperationMode(CalculatorModel.FLOAT_MODE);
+
+				for (int i = 0; i < hexButtons.length; i++) {
+
+					hexButtons[i].setEnabled(false);
+
+				}
+				/*
+				 * if no error state is detected, the displays are set to their default values
+				 */
+				if (model.getErrorState() == false) {
+					display(true);
+					defaultDisplays();
+				}
+
+				break;
+			/* This handles .00 precision button events */
+			case ".00":
+
+				integerFlag = false;
+				model.setFloatingPointPrecision(CalculatorModel.PRECISION_00);
+				model.setOperationMode(CalculatorModel.FLOAT_MODE);
+
+				for (int i = 0; i < hexButtons.length; i++) {
+
+					hexButtons[i].setEnabled(false);
+
+				}
+
+				/*
+				 * if no error state is detected, the displays are set to their default values
+				 */
+				if (model.getErrorState() == false) {
+					display(true);
+					defaultDisplays();
+				}
+
+				break;
+			/* This handles Sci precision button events */
+			case "Sci":
+
+				integerFlag = false;
+				model.setOperationMode(CalculatorModel.FLOAT_MODE);
+				model.setFloatingPointPrecision(CalculatorModel.PRECISION_SCI);
+
+				for (int i = 0; i < hexButtons.length; i++) {
+
+					hexButtons[i].setEnabled(false);
+
+				}
+				/*
+				 * if no error state is detected, the displays are set to their default values
+				 */
+				if (model.getErrorState() == false) {
+					display(true);
+					defaultDisplays();
+				}
+				break;
+			/* This handles Hex precision button events */
+			case "Hex":
+
+				integerFlag = true;
+				model.setOperationMode(CalculatorModel.INTEGER_MODE);
+				model.setFloatingPointPrecision(CalculatorModel.HEXADECIMAL);
+
+				for (int i = 0; i < hexButtons.length; i++) {
+
+					hexButtons[i].setEnabled(true);
+
+				}
+
+				/*
+				 * if no error state is detected, the displays are set to their default values
+				 */
+				if (model.getErrorState() == false) {
+					display(false);
+					defaultDisplays();
+				}
+				break;
+
+			default:
+				break;
+			}
+
+			/*
+			 * if an error was detected in the above code, this will allow it to display in
+			 * the calculator
+			 */
+			if (keypadError == true) {
+
+				error.setText("E");
+				error.setBackground(Color.RED);
+				display2.setText(model.getErrorMessage());
+				model.resetErrorMessage();
+
+			}
+
 		}
 
 	}
